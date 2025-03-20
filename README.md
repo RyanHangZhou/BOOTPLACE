@@ -67,15 +67,10 @@ Here is an [example](test.py) of how to use the pretrained models for object pla
  -->
 
 
-## Requirements
-- Python 3 with numpy, scikit-image, opencv-python, and PyTorch.
-
-
-## Datasets
-We use the data from Cityscapes and [OPA](https://github.com/bcmi/Object-Placement-Assessment-Dataset-OPA). Note that we have provided instructions to prepare customized Cityscapes dataset for object composition in supplementary material.
-
-We also provide the pre-trained network weights for Cityscapes and OPA.
-(The weights will be provided here in a personal cloud storage. Omitted for anonymity.)
+<!-- Dataset -->
+## 📚 Dataset
+<!-- We use the data from Cityscapes and [OPA](https://github.com/bcmi/Object-Placement-Assessment-Dataset-OPA). Note that we have provided instructions to prepare customized Cityscapes dataset for object composition in supplementary material. -->
+<!-- We provide **TRELLIS-500K**, a large-scale dataset containing 500K 3D assets curated from [Objaverse(XL)](https://objaverse.allenai.org/), [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html), [3D-FUTURE](https://tianchi.aliyun.com/specials/promotion/alibaba-3d-future), [HSSD](https://huggingface.co/datasets/hssd/hssd-models), and [Toys4k](https://github.com/rehg-lab/lowshot-shapebias/tree/main/toys4k), filtered based on aesthetic scores. Please refer to the [dataset README](DATASET.md) for more details. -->
 
 
 ## Training
@@ -98,8 +93,8 @@ python -m main \
 where ```--eos_coef``` is a hyperparameter to control the weight for non-object detection; ```--data_path``` specify the path of training data.
 
 
-<!-- ## Evaluation
-```
+## Evaluation
+<!-- ```
 python test_one_sample2_recomp.py \
     --is_recompose True \
     --num_queries 120 \
@@ -107,13 +102,8 @@ python test_one_sample2_recomp.py \
     --pretrained_model 'data_Cityscapes/checkpoint0059.pth' \
     --im_root 'data/Cityscapes/test' \
     --savedir '/results/data_Cityscapes_recomposition_0059'
-``` -->
-
-
-<!-- Dataset -->
-## 📚 Dataset
-
-<!-- We provide **TRELLIS-500K**, a large-scale dataset containing 500K 3D assets curated from [Objaverse(XL)](https://objaverse.allenai.org/), [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html), [3D-FUTURE](https://tianchi.aliyun.com/specials/promotion/alibaba-3d-future), [HSSD](https://huggingface.co/datasets/hssd/hssd-models), and [Toys4k](https://github.com/rehg-lab/lowshot-shapebias/tree/main/toys4k), filtered based on aesthetic scores. Please refer to the [dataset README](DATASET.md) for more details. -->
+```
+ -->
 
 
 
