@@ -2,7 +2,20 @@
 PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with Detection Transformers.
 
 
+***Check out our [Project Page](https://trellis3d.github.io) for more visual demos!***
 
+<!-- Updates -->
+## ⏩ Updates
+
+**03/19/2025**
+- Release training code.
+
+<!-- TODO List -->
+## 🚧 TODO List
+- [x] Release training code
+- [ ] Release pretrained models
+- [ ] Release dataset
+- [ ] Release inference code
 
 
 
@@ -32,6 +45,16 @@ We provide the following pretrained models:
 | --- | --- | --- | --- |
 | BOOTPLACE_Cityscapes | Multiple supervision | 43.5M | [Download](https://huggingface.co/JeffreyXiang/TRELLIS-image-large) |
 | BOOTPLACE_OPA | Single supervision | Coming Soon | Coming Soon |
+
+
+<!-- Usage -->
+## 💡 Usage
+
+### Minimal Example
+
+Here is an [example](test.py) of how to use the pretrained models for object placement.
+
+
 
 
 ## Requirements
@@ -101,7 +124,7 @@ If you find this work helpful, please consider citing our paper:
 @article{zhou2025bootplace,
     title   = {BOOTPLACE: Bootstrapped Object Placement with Detection Transformers},
     author  = {Zhou, Hang and Zuo, Xinxin and Ma, Rui and Cheng, Li},
-    <!-- journal = {arXiv preprint arXiv:2412.01506}, -->
+    journal = {arXiv preprint arXiv:}, 
     year    = {2025}
 }
 ```
