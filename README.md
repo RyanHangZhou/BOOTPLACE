@@ -42,6 +42,8 @@ PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with D
   ```
   conda env create --file=BOOTPLACE.yml
   ```
+  Download DETR pretrained models for finetuning [here](https://github.com/facebookresearch/detr) and put it in the directory `weight`. 
+
   
 
 <!-- Pretrained Models -->
@@ -51,27 +53,26 @@ We provide the following pretrained models:
 
 | Model | Description | #Params | Download |
 | --- | --- | --- | --- |
-| BOOTPLACE_Cityscapes | Multiple supervision | 43.5M | [Download](https://huggingface.co/JeffreyXiang/TRELLIS-image-large) |
+| BOOTPLACE_Cityscapes | Multiple supervision | 43.5M | [Download](https://drive.google.com/file/d/1ptWd_3NTTqkk1I4XI9GubRpgVopfnN1p/view?usp=sharing) |
 | BOOTPLACE_OPA | Single supervision | Coming Soon | Coming Soon |
 
 
 <!-- Usage -->
-## 💡 Usage
+<!-- ## 💡 Usage
 
 ### Minimal Example
 
 Here is an [example](test.py) of how to use the pretrained models for object placement.
 
-
+ -->
 
 
 ## Requirements
 - Python 3 with numpy, scikit-image, opencv-python, and PyTorch.
 
 
-## Datasets and weights
+## Datasets
 We use the data from Cityscapes and [OPA](https://github.com/bcmi/Object-Placement-Assessment-Dataset-OPA). Note that we have provided instructions to prepare customized Cityscapes dataset for object composition in supplementary material.
-Please download the DETR pretrained model for finetuning [here](https://github.com/facebookresearch/detr).
 
 We also provide the pre-trained network weights for Cityscapes and OPA.
 (The weights will be provided here in a personal cloud storage. Omitted for anonymity.)
