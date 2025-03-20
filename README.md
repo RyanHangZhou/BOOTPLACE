@@ -1,3 +1,9 @@
+
+<!-- <p align="center"><a href="https://arxiv.org/abs/2412.01506"><img src='https://img.shields.io/badge/arXiv-Paper-red?logo=arxiv&logoColor=white' alt='arXiv'></a> -->
+<!-- <a href='https://trellis3d.github.io'><img src='https://img.shields.io/badge/Project_Page-Website-green?logo=googlechrome&logoColor=white' alt='Project Page'></a> -->
+<!-- </p> -->
+<p align="center"><img src="assets/teaser.pdf" width="100%"></p>
+
 # BOOTPLACE
 PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with Detection Transformers.
 
@@ -26,9 +32,8 @@ PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with D
 - **System**: The code is currently tested only on **Linux**. 
 - **Hardware**: An NVIDIA GPU with at least 16GB of memory is necessary. The code has been verified on NVIDIA A6000 GPUs.  
 - **Software**:   
-  - The [CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit-archive) is needed to compile certain submodules. The code has been tested with CUDA versions 11.8 and 12.2.  
   - [Conda](https://docs.anaconda.com/miniconda/install/#quick-command-line-install) is recommended for managing dependencies.  
-  - Python version 3.8 or higher is required. 
+  - Python version 3.6 or higher is required. 
 
   Create a new conda environment named `BOOTPLACE` and install the dependencies: 
   ```
