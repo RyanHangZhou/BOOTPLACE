@@ -16,13 +16,13 @@ PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with D
 <!-- Updates -->
 ## ⏩ Updates
 
-**03/19/2025**
-- Release training code.
+**03/20/2025**
+- Release training code and pretrained models.
 
 <!-- TODO List -->
 ## 🚧 TODO List
 - [x] Release training code
-- [ ] Release pretrained models
+- [x] Release pretrained models
 - [ ] Release dataset
 - [ ] Release inference code
 
@@ -42,7 +42,7 @@ PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with D
   ```
   conda env create --file=BOOTPLACE.yml
   ```
-  Download DETR pretrained models for finetuning [here](https://github.com/facebookresearch/detr) and put it in the directory `weight`. 
+  Download DETR-R50 pretrained models for finetuning [here](https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth) and put it in the directory ```weight/detr-r50-e632da11.pth```. 
 
   
 
@@ -54,7 +54,7 @@ We provide the following pretrained models:
 | Model | Description | #Params | Download |
 | --- | --- | --- | --- |
 | BOOTPLACE_Cityscapes | Multiple supervision | 43.5M | [Download](https://drive.google.com/file/d/1ptWd_3NTTqkk1I4XI9GubRpgVopfnN1p/view?usp=sharing) |
-| BOOTPLACE_OPA | Single supervision | Coming Soon | Coming Soon |
+| BOOTPLACE_OPA | Single supervision | Coming soon | Coming soon |
 
 
 <!-- Usage -->
@@ -84,7 +84,7 @@ To train a model on Cityscapes:
 ```
 python -m main \
     --epochs 200 \
-    --batch_size 2\
+    --batch_size 2 \
     --save_freq 10 \
     --set_cost_class 1 \
     --ce_loss_coef 1 \
@@ -92,13 +92,13 @@ python -m main \
     --eos_coef 0 \
     --lr 1e-4 \
     --data_path data/Cityscapes \
-    --output_dir /results/data_Cityscapes\
+    --output_dir results/Cityscapes\
     --resume weights/detr-r50-e632da11.pth
 ```
-where ```--eos_coef``` is a hyperparameter to control the weight for non-object detection; ```--data_path``` specify the training data.
+where ```--eos_coef``` is a hyperparameter to control the weight for non-object detection; ```--data_path``` specify the path of training data.
 
 
-## Evaluation
+<!-- ## Evaluation
 ```
 python test_one_sample2_recomp.py \
     --is_recompose True \
@@ -107,13 +107,13 @@ python test_one_sample2_recomp.py \
     --pretrained_model 'data_Cityscapes/checkpoint0059.pth' \
     --im_root 'data/Cityscapes/test' \
     --savedir '/results/data_Cityscapes_recomposition_0059'
-```
+``` -->
 
 
 <!-- Dataset -->
-## 📚 Dataset
+<!-- ## 📚 Dataset
 
-We provide **TRELLIS-500K**, a large-scale dataset containing 500K 3D assets curated from [Objaverse(XL)](https://objaverse.allenai.org/), [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html), [3D-FUTURE](https://tianchi.aliyun.com/specials/promotion/alibaba-3d-future), [HSSD](https://huggingface.co/datasets/hssd/hssd-models), and [Toys4k](https://github.com/rehg-lab/lowshot-shapebias/tree/main/toys4k), filtered based on aesthetic scores. Please refer to the [dataset README](DATASET.md) for more details.
+We provide **TRELLIS-500K**, a large-scale dataset containing 500K 3D assets curated from [Objaverse(XL)](https://objaverse.allenai.org/), [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html), [3D-FUTURE](https://tianchi.aliyun.com/specials/promotion/alibaba-3d-future), [HSSD](https://huggingface.co/datasets/hssd/hssd-models), and [Toys4k](https://github.com/rehg-lab/lowshot-shapebias/tree/main/toys4k), filtered based on aesthetic scores. Please refer to the [dataset README](DATASET.md) for more details. -->
 
 
 
