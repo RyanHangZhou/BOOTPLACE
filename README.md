@@ -11,7 +11,7 @@
 PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with Detection Transformers. -->
 
 
-***Check out our [Project Page](https://trellis3d.github.io) for more visual demos!***
+***Check out our [Project Page](https://ryanhangzhou.github.io/bootplace/) for more visual demos!***
 
 <!-- Updates -->
 ## ⏩ Updates
@@ -130,7 +130,7 @@ If you find this work helpful, please consider citing our paper:
 
 ```bibtex
 @article{zhou2025bootplace,
-    title   = {BOOTPLACE: Bootstrapped Object Placement with Detection Transformers},
+    title   = {{BOOTPLACE}: Bootstrapped Object Placement with Detection Transformers},
     author  = {Zhou, Hang and Zuo, Xinxin and Ma, Rui and Cheng, Li},
     journal = {arXiv preprint arXiv:}, 
     year    = {2025}
