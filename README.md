@@ -136,7 +136,7 @@ python -m main \
     --eos_coef 0.1 \
     --lr 1e-4 \
     --data_path data/Cityscapes \
-    --output_dir results/Cityscapes_ckpt\
+    --output_dir results/Cityscapes_ckpt \
     --resume weights/detr-r50-e632da11.pth
 ```
 
