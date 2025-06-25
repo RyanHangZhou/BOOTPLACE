@@ -75,6 +75,7 @@ Here is an [example](test.py) of how to use the pretrained models for object pla
 <!-- We provide **TRELLIS-500K**, a large-scale dataset containing 500K 3D assets curated from [Objaverse(XL)](https://objaverse.allenai.org/), [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html), [3D-FUTURE](https://tianchi.aliyun.com/specials/promotion/alibaba-3d-future), [HSSD](https://huggingface.co/datasets/hssd/hssd-models), and [Toys4k](https://github.com/rehg-lab/lowshot-shapebias/tree/main/toys4k), filtered based on aesthetic scores. Please refer to the [dataset README](DATASET.md) for more details. -->
 We provide a large-scale street-scene vehicle placement dataset [Download](https://drive.google.com/file/d/1wOzpMPy3Vy0tdBRD0xC1eW3SO2aVeCVX/view?usp=sharing) curated from [Cityscapes](https://www.cityscapes-dataset.com/). 
 The file structures are: 
+```
 ├── train
     ├── backgrounds:
         ├── imgID.png
@@ -118,7 +119,7 @@ The file structures are:
             ├── ……
         ├── ……
     ├── annotations.json
-
+```
 
 
 ## Training
@@ -139,7 +140,7 @@ python -m main \
     --resume weights/detr-r50-e632da11.pth
 ```
 
-## Evaluation
+## Inference
 ```
 python test.py \
     --num_queries 120 \
