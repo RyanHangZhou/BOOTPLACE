@@ -1,5 +1,5 @@
-from .bootplace import build
+from .bootplace import build as build_bootplace
 
 
 def build_model(args):
-    return build(args)
+    return build_bootplace(args)

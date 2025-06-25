@@ -282,83 +282,86 @@ def _max_by_axis(the_list):
     return maxes
 
 
-class NestedTensor(object):
-    def __init__(self, tensors, mask: Optional[Tensor]):
+class NestedTensor:
+    """
+    Represents a batch of tensors padded to the same shape, with associated masks.
+    """
+
+    def __init__(self, tensors: Tensor, mask: Optional[Tensor]):
         self.tensors = tensors
         self.mask = mask
 
     def to(self, device):
-        # type: (Device) -> NestedTensor # noqa
-        cast_tensor = self.tensors.to(device)
-        mask = self.mask
-        if mask is not None:
-            assert mask is not None
-            cast_mask = mask.to(device)
-        else:
-            cast_mask = None
-        return NestedTensor(cast_tensor, cast_mask)
+        """
+        Moves the tensor and mask to the specified device.
+        """
+        tensors = self.tensors.to(device)
+        mask = self.mask.to(device) if self.mask is not None else None
+        return NestedTensor(tensors, mask)
 
-    def decompose(self):
+    def decompose(self) -> (Tensor, Optional[Tensor]):
         return self.tensors, self.mask
 
     def __repr__(self):
-        return str(self.tensors)
+        return f"NestedTensor(tensors={self.tensors.shape}, mask={self.mask.shape if self.mask is not None else None})"
 
 
-def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
-    # TODO make this more general
-    if tensor_list[0].ndim == 3:
-        if torchvision._is_tracing():
-            # nested_tensor_from_tensor_list() does not export well to ONNX
-            # call _onnx_nested_tensor_from_tensor_list() instead
-            return _onnx_nested_tensor_from_tensor_list(tensor_list)
+def nested_tensor_from_tensor_list(tensor_list: List[Tensor]) -> NestedTensor:
+    """
+    Converts a list of tensors [C, H, W] into a single NestedTensor with padding and masks.
+    """
+    if tensor_list[0].ndim != 3:
+        raise ValueError("Only 3D tensors [C, H, W] are supported")
 
-        # TODO make it support different-sized images
-        max_size = _max_by_axis([list(img.shape) for img in tensor_list])
-        # min_size = tuple(min(s) for s in zip(*[img.shape for img in tensor_list]))
-        batch_shape = [len(tensor_list)] + max_size
-        b, c, h, w = batch_shape
-        dtype = tensor_list[0].dtype
-        device = tensor_list[0].device
-        tensor = torch.zeros(batch_shape, dtype=dtype, device=device)
-        mask = torch.ones((b, h, w), dtype=torch.bool, device=device)
-        for img, pad_img, m in zip(tensor_list, tensor, mask):
-            pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
-            m[: img.shape[1], :img.shape[2]] = False
-    else:
-        raise ValueError('not supported')
-    return NestedTensor(tensor, mask)
+    if torchvision._is_tracing():
+        return _onnx_nested_tensor_from_tensor_list(tensor_list)
+
+    # Get max dimensions
+    max_size = _max_by_axis([list(t.shape) for t in tensor_list])
+    batch_size = len(tensor_list)
+    c, h, w = max_size
+    dtype = tensor_list[0].dtype
+    device = tensor_list[0].device
+
+    # Allocate padded tensor and mask
+    padded_tensor = torch.zeros((batch_size, c, h, w), dtype=dtype, device=device)
+    mask = torch.ones((batch_size, h, w), dtype=torch.bool, device=device)
+
+    for i, img in enumerate(tensor_list):
+        padded_tensor[i, :img.shape[0], :img.shape[1], :img.shape[2]].copy_(img)
+        mask[i, :img.shape[1], :img.shape[2]] = False
+
+    return NestedTensor(padded_tensor, mask)
 
 
-# _onnx_nested_tensor_from_tensor_list() is an implementation of
-# nested_tensor_from_tensor_list() that is supported by ONNX tracing.
 @torch.jit.unused
 def _onnx_nested_tensor_from_tensor_list(tensor_list: List[Tensor]) -> NestedTensor:
-    max_size = []
-    for i in range(tensor_list[0].dim()):
-        max_size_i = torch.max(torch.stack([img.shape[i] for img in tensor_list]).to(torch.float32)).to(torch.int64)
-        max_size.append(max_size_i)
-    max_size = tuple(max_size)
+    """
+    ONNX-compatible version of nested_tensor_from_tensor_list.
+    """
+    max_size = [torch.max(torch.stack([torch.tensor(img.shape[i], dtype=torch.float32)
+                                       for img in tensor_list])).to(torch.int64)
+                for i in range(tensor_list[0].dim())]
 
-    # work around for
-    # pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
-    # m[: img.shape[1], :img.shape[2]] = False
-    # which is not yet supported in onnx
     padded_imgs = []
     padded_masks = []
+
     for img in tensor_list:
-        padding = [(s1 - s2) for s1, s2 in zip(max_size, tuple(img.shape))]
-        padded_img = torch.nn.functional.pad(img, (0, padding[2], 0, padding[1], 0, padding[0]))
+        padding = [max_size[i] - img.shape[i] for i in range(len(max_size))]
+
+        # Pad (dim3, dim2, dim1): PyTorch uses reverse order
+        padded_img = torch.nn.functional.pad(img,
+                                             (0, padding[2], 0, padding[1], 0, padding[0]))
         padded_imgs.append(padded_img)
 
         m = torch.zeros_like(img[0], dtype=torch.int, device=img.device)
-        padded_mask = torch.nn.functional.pad(m, (0, padding[2], 0, padding[1]), "constant", 1)
+        padded_mask = torch.nn.functional.pad(m, (0, padding[2], 0, padding[1]), value=1)
         padded_masks.append(padded_mask.to(torch.bool))
 
     tensor = torch.stack(padded_imgs)
     mask = torch.stack(padded_masks)
 
-    return NestedTensor(tensor, mask=mask)
+    return NestedTensor(tensor, mask)
 
 
 def setup_for_distributed(is_master):

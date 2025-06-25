@@ -1,150 +1,166 @@
-# -*- coding: utf-8 -*-
-'''
-@File    :   visualizer.py
-@Time    :   2022/04/05 11:39:33
-@Author  :   Shilong Liu 
-@Contact :   liusl20@mail.tsinghua.edu.cn; slongliu86@gmail.com
-Modified from COCO evaluator
-'''
+import os
+import datetime
+from typing import Optional, Dict, Union
 
-import os, sys
-from textwrap import wrap
 import torch
 import numpy as np
-import cv2
-import datetime
-
 import matplotlib.pyplot as plt
-from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
+from PIL import Image
+from textwrap import wrap
+
 from pycocotools import mask as maskUtils
-from matplotlib import transforms
 
-def renorm(img: torch.FloatTensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) \
-        -> torch.FloatTensor:
-    # img: tensor(3,H,W) or tensor(B,3,H,W)
-    # return: same as img
-    assert img.dim() == 3 or img.dim() == 4, "img.dim() should be 3 or 4 but %d" % img.dim() 
+
+def renorm(img: torch.Tensor, mean=None, std=None) -> torch.Tensor:
+    """
+    Denormalize image tensor (3,H,W) or (B,3,H,W) to [0,1] RGB.
+
+    Args:
+        img (Tensor): Normalized tensor image
+        mean (list): Mean used for normalization
+        std (list): Std used for normalization
+
+    Returns:
+        Tensor: Denormalized image
+    """
+    mean = mean or [0.485, 0.456, 0.406]
+    std = std or [0.229, 0.224, 0.225]
+    assert img.dim() in (3, 4), f"Expected img of dim 3 or 4, got {img.dim()}"
+    assert img.size(-3) == 3, f"Expected 3 channels, got {img.size(-3)}"
+
+    mean = torch.tensor(mean, device=img.device)
+    std = torch.tensor(std, device=img.device)
+
     if img.dim() == 3:
-        assert img.size(0) == 3, 'img.size(0) shoule be 3 but "%d". (%s)' % (img.size(0), str(img.size()))
-        img_perm = img.permute(1,2,0)
-        mean = torch.Tensor(mean)
-        std = torch.Tensor(std)
-        img_res = img_perm * std + mean
-        return img_res.permute(2,0,1)
-    else: # img.dim() == 4
-        assert img.size(1) == 3, 'img.size(1) shoule be 3 but "%d". (%s)' % (img.size(1), str(img.size()))
-        img_perm = img.permute(0,2,3,1)
-        mean = torch.Tensor(mean)
-        std = torch.Tensor(std)
-        img_res = img_perm * std + mean
-        return img_res.permute(0,3,1,2)
-
-class ColorMap():
-    def __init__(self, basergb=[255,255,0]):
-        self.basergb = np.array(basergb)
-    def __call__(self, attnmap):
-        # attnmap: h, w. np.uint8.
-        # return: h, w, 4. np.uint8.
-        assert attnmap.dtype == np.uint8
-        h, w = attnmap.shape
-        res = self.basergb.copy()
-        res = res[None][None].repeat(h, 0).repeat(w, 1) # h, w, 3
-        attn1 = attnmap.copy()[..., None] # h, w, 1
-        res = np.concatenate((res, attn1), axis=-1).astype(np.uint8)
-        return res
+        return (img * std[:, None, None] + mean[:, None, None])
+    else:
+        return (img * std[None, :, None, None] + mean[None, :, None, None])
 
 
-class COCOVisualizer():
-    def __init__(self) -> None:
+class ColorMap:
+    def __init__(self, base_rgb=(255, 255, 0)):
+        self.base_rgb = np.array(base_rgb)
+
+    def __call__(self, attn_map: np.ndarray) -> np.ndarray:
+        """
+        Convert 1-channel attention map to RGBA using base color.
+
+        Args:
+            attn_map (np.ndarray): Attention map (H, W), uint8
+
+        Returns:
+            np.ndarray: RGBA image (H, W, 4)
+        """
+        assert attn_map.dtype == np.uint8
+        h, w = attn_map.shape
+        rgb = np.tile(self.base_rgb[None, None, :], (h, w, 1))
+        rgba = np.concatenate((rgb, attn_map[..., None]), axis=-1)
+        return rgba.astype(np.uint8)
+
+
+class COCOVisualizer:
+    """
+    Visualize COCO-format bounding box annotations.
+    """
+
+    def __init__(self):
         pass
 
-    def visualize(self, img, tgt, caption=None, dpi=120, savedir=None, show_in_console=True):
+    def visualize(
+        self,
+        img: torch.Tensor,
+        tgt: Dict,
+        caption: Optional[str] = None,
+        dpi: int = 120,
+        savedir: Optional[str] = None,
+        show_in_console: bool = True
+    ) -> None:
         """
-        img: tensor(3, H, W)
-        tgt: make sure they are all on cpu.
-            must have items: 'image_id', 'boxes', 'size'
+        Visualize and optionally save a bounding box image.
+
+        Args:
+            img (Tensor): Image tensor (3,H,W)
+            tgt (Dict): Target dict containing at least 'boxes', 'size'
+            caption (str): Optional string label
+            dpi (int): Resolution
+            savedir (str): Save path
+            show_in_console (bool): Whether to call plt.show()
         """
         plt.figure(dpi=dpi)
-        plt.rcParams['font.size'] = '5'
+        plt.rcParams['font.size'] = 5
         ax = plt.gca()
-        img = renorm(img).permute(1, 2, 0)
+        img = renorm(img).permute(1, 2, 0).cpu().numpy()
         ax.imshow(img)
-        
-        self.addtgt(tgt)
+
+        self._add_target_boxes(tgt)
+
+        if savedir:
+            filename = f"{caption or 'vis'}-{int(tgt['image_id'])}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}.png"
+            full_path = os.path.join(savedir, filename)
+            os.makedirs(savedir, exist_ok=True)
+            plt.savefig(full_path)
+            print(f"[Visualizer] Saved to {full_path}")
+
         if show_in_console:
             plt.show()
-
-        if savedir is not None:
-            if caption is None:
-                savename = '{}/{}-{}.png'.format(savedir, int(tgt['image_id']), str(datetime.datetime.now()).replace(' ', '-'))
-            else:
-                savename = '{}/{}-{}-{}.png'.format(savedir, caption, int(tgt['image_id']), str(datetime.datetime.now()).replace(' ', '-'))
-            print("savename: {}".format(savename))
-            os.makedirs(os.path.dirname(savename), exist_ok=True)
-            plt.savefig(savename)
         plt.close()
-    
-    def savefig(self, img, tgt, filename, savedir, dpi=120):
+
+    def savefig(self, img: torch.Tensor, tgt: Dict, filename: str, savedir: str, dpi: int = 120) -> None:
         """
-        img: tensor(3, H, W)
-        tgt: make sure they are all on cpu.
-            must have items: 'image_id', 'boxes', 'size'
+        Save visualization image with bounding boxes.
+
+        Args:
+            img (Tensor): Image tensor
+            tgt (Dict): Target dict
+            filename (str): Output filename (no extension)
+            savedir (str): Output directory
         """
         plt.figure(dpi=dpi)
-        plt.rcParams['font.size'] = '5'
+        plt.rcParams['font.size'] = 5
         ax = plt.gca()
-        img = renorm(img).permute(1, 2, 0)
+        img = renorm(img).permute(1, 2, 0).cpu().numpy()
         ax.imshow(img)
-        
-        self.addtgt(tgt)
 
-        savename = '{}/{}_box.png'.format(savedir, filename)
-        # print("savename: {}".format(savename))
-        os.makedirs(os.path.dirname(savename), exist_ok=True)
-        plt.savefig(savename)
+        self._add_target_boxes(tgt)
+
+        path = os.path.join(savedir, f"{filename}_box.png")
+        os.makedirs(savedir, exist_ok=True)
+        plt.savefig(path)
         plt.close()
 
-    def addtgt(self, tgt):
+    def _add_target_boxes(self, tgt: Dict[str, Union[torch.Tensor, list]]) -> None:
         """
-        - tgt: dict. args:
-            - boxes: num_boxes, 4. xywh, [0,1].
-            - box_label: num_boxes.
+        Add bounding boxes and labels to the plot.
         """
-        assert 'boxes' in tgt
+        assert 'boxes' in tgt and 'size' in tgt, "Target must include 'boxes' and 'size'"
         ax = plt.gca()
-        H, W = tgt['size'].tolist() 
-        numbox = tgt['boxes'].shape[0]
+        H, W = tgt['size']
+        boxes = tgt['boxes'].cpu()
+        labels = tgt.get('box_label', [])
+        caption = tgt.get('caption', None)
 
-        color = []
-        polygons = []
-        boxes = []
-        for box in tgt['boxes'].cpu():
-            unnormbbox = box * torch.Tensor([W, H, W, H])
-            unnormbbox[:2] -= unnormbbox[2:] / 2
-            [bbox_x, bbox_y, bbox_w, bbox_h] = unnormbbox.tolist() # [x0, y0, w, h]
-            boxes.append([bbox_x, bbox_y, bbox_w, bbox_h])
-            poly = [[bbox_x, bbox_y], [bbox_x, bbox_y+bbox_h], [bbox_x+bbox_w, bbox_y+bbox_h], [bbox_x+bbox_w, bbox_y]]
-            np_poly = np.array(poly).reshape((4,2))
-            polygons.append(Polygon(np_poly))
-            c = (np.random.random((1, 3))*0.6+0.4).tolist()[0]
-            color.append(c)
+        polygons, colors, label_positions = [], [], []
 
-        p = PatchCollection(polygons, facecolor=color, linewidths=0, alpha=0.1)
-        ax.add_collection(p)
-        p = PatchCollection(polygons, facecolor='none', edgecolors=color, linewidths=2)
-        ax.add_collection(p)
+        for i, box in enumerate(boxes):
+            cx, cy, w, h = (box * torch.tensor([W, H, W, H])).tolist()
+            x0, y0 = cx - w / 2, cy - h / 2
+            poly = np.array([[x0, y0], [x0, y0 + h], [x0 + w, y0 + h], [x0 + w, y0]])
+            polygons.append(Polygon(poly))
+            c = (np.random.rand(3) * 0.6 + 0.4).tolist()
+            colors.append(c)
+            label_positions.append((x0, y0))
 
+        patch_fill = PatchCollection(polygons, facecolor=colors, linewidths=0, alpha=0.1)
+        patch_edge = PatchCollection(polygons, facecolor='none', edgecolors=colors, linewidths=2)
+        ax.add_collection(patch_fill)
+        ax.add_collection(patch_edge)
 
-        if 'box_label' in tgt:
-            assert len(tgt['box_label']) == numbox, f"{len(tgt['box_label'])} = {numbox}, "
-            for idx, bl in enumerate(tgt['box_label']):
-                _string = str(bl)
-                bbox_x, bbox_y, bbox_w, bbox_h = boxes[idx]
-                # ax.text(bbox_x, bbox_y, _string, color='black', bbox={'facecolor': 'yellow', 'alpha': 1.0, 'pad': 1})
-                ax.text(bbox_x, bbox_y, _string, color='black', bbox={'facecolor': color[idx], 'alpha': 0.6, 'pad': 1})
+        for i, pos in enumerate(label_positions):
+            if labels:
+                ax.text(pos[0], pos[1], str(labels[i]), color='black',
+                        bbox={'facecolor': colors[i], 'alpha': 0.6, 'pad': 1})
 
-        if 'caption' in tgt:
-            ax.set_title(tgt['caption'], wrap=True)
-
-
+        if caption:
+            ax.set_title("\n".join(wrap(caption, 60)))

@@ -23,8 +23,8 @@ PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with D
 ## 🚧 TODO List
 - [x] Release training code
 - [x] Release pretrained models
-- [ ] Release dataset
-- [ ] Release inference code
+- [x] Release dataset
+- [x] Release inference code
 
 
 
@@ -42,7 +42,7 @@ PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with D
   ```
   conda env create --file=BOOTPLACE.yml
   ```
-  Download DETR-R50 pretrained models for finetuning [here](https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth) and put it in the directory ```weight/detr-r50-e632da11.pth```. 
+  Download DETR-R50 pretrained models for finetuning [here](https://dl.fbaipublicfiles.com/detr/detr-r50-e632da11.pth) and put it in the directory ```weights/detr-r50-e632da11.pth```. 
 
   
 
@@ -71,6 +71,52 @@ Here is an [example](test.py) of how to use the pretrained models for object pla
 ## 📚 Dataset
 <!-- We use the data from Cityscapes and [OPA](https://github.com/bcmi/Object-Placement-Assessment-Dataset-OPA). Note that we have provided instructions to prepare customized Cityscapes dataset for object composition in supplementary material. -->
 <!-- We provide **TRELLIS-500K**, a large-scale dataset containing 500K 3D assets curated from [Objaverse(XL)](https://objaverse.allenai.org/), [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html), [3D-FUTURE](https://tianchi.aliyun.com/specials/promotion/alibaba-3d-future), [HSSD](https://huggingface.co/datasets/hssd/hssd-models), and [Toys4k](https://github.com/rehg-lab/lowshot-shapebias/tree/main/toys4k), filtered based on aesthetic scores. Please refer to the [dataset README](DATASET.md) for more details. -->
+We provide a large-scale street-scene vehicle placement dataset curated from [Cityscapes](https://www.cityscapes-dataset.com/). 
+The file structures are: 
+├── train
+    ├── backgrounds:
+        ├── imgID.png
+        ├── ……
+    ├── objects:
+        ├── imgID:
+            ├── object_name_ID.png
+            ├── ……
+        ├── ……
+    ├── location:
+        ├── imgID:
+            ├── object_name_ID.txt
+            ├── ……
+        ├── ……
+    ├── annotations.json
+├── test
+    ├── backgrounds:
+        ├── imgID.png
+        ├── ……
+    |── backgrounds_single
+        ├── imgID.png
+        ├── ……
+    ├── objects:
+        ├── imgID:
+            ├── object_name_ID.png
+            ├── ……
+        ├── ……
+    ├── objects_single:
+        ├── imgID:
+            ├── object_name_ID.png
+            ├── ……
+        ├── ……
+    ├── location:
+        ├── imgID:
+            ├── object_name_ID.txt
+            ├── ……
+        ├── ……
+    ├── location_single:
+        ├── imgID:
+            ├── object_name_ID.txt
+            ├── ……
+        ├── ……
+    ├── annotations.json
+
 
 
 ## Training
@@ -84,26 +130,23 @@ python -m main \
     --set_cost_class 1 \
     --ce_loss_coef 1 \
     --num_queries 120 \
-    --eos_coef 0 \
+    --eos_coef 0.1 \
     --lr 1e-4 \
     --data_path data/Cityscapes \
-    --output_dir results/Cityscapes\
+    --output_dir results/Cityscapes_ckpt\
     --resume weights/detr-r50-e632da11.pth
 ```
-where ```--eos_coef``` is a hyperparameter to control the weight for non-object detection; ```--data_path``` specify the path of training data.
-
 
 ## Evaluation
-<!-- ```
-python test_one_sample2_recomp.py \
-    --is_recompose True \
-    --num_queries 120 \
-    --eos_coef 0.01 \
-    --pretrained_model 'data_Cityscapes/checkpoint0059.pth' \
-    --im_root 'data/Cityscapes/test' \
-    --savedir '/results/data_Cityscapes_recomposition_0059'
 ```
- -->
+python test.py \
+    --num_queries 120 \
+    --data_path data/Cityscapes \
+    --pretrained_model 'results/Cityscapes_ckpt/checkpoint.pth' \
+    --im_root 'data/Cityscapes/test' \
+    --output_dir 'results/Cityscape_inference'
+```
+
 
 
 
@@ -123,7 +166,7 @@ If you find this work helpful, please consider citing our paper:
 @article{zhou2025bootplace,
     title   = {{BOOTPLACE}: Bootstrapped Object Placement with Detection Transformers},
     author  = {Zhou, Hang and Zuo, Xinxin and Ma, Rui and Cheng, Li},
-    journal = {arXiv preprint arXiv:}, 
+    journal = {arXiv preprint arXiv:2503.21991}, 
     year    = {2025}
 }
 ```
