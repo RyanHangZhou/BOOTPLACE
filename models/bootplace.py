@@ -81,19 +81,6 @@ class BOOTPLACE(nn.Module):
         device = patches.device
         B = len(targets)
 
-        # Initialize target tensor placeholders
-        # target_boxes = torch.zeros(B, self.num_queries, 4, device=device)
-        # target_mask = torch.zeros(B, self.num_queries, device=device)
-
-        # for i, tgt in enumerate(targets):
-        #     num_obj = min(len(tgt['boxes']), len(tgt['negative_bin_mask']))
-        #     target_boxes[i, :num_obj] = tgt['boxes'][:num_obj]
-        #     target_mask[i, :num_obj] = tgt['negative_bin_mask'][:num_obj]
-
-        # # Mask unused slots
-        # target_mask = target_mask.unsqueeze(-1).expand_as(target_boxes)
-        # scene_boxes = target_boxes * target_mask
-
         scene_boxes = torch.zeros(B, self.num_queries, 4, device=device)
         for i, tgt in enumerate(targets):
             num_obj = len(tgt['scene_boxes'])
