@@ -56,8 +56,7 @@ We provide the following pretrained models:
 
 | Model | Description | #Params | Download |
 | --- | --- | --- | --- |
-| BOOTPLACE_Cityscapes | Multiple supervision | 43.5M | [Download](https://drive.google.com/file/d/1ptWd_3NTTqkk1I4XI9GubRpgVopfnN1p/view?usp=sharing) |
-| BOOTPLACE_OPA | Single supervision | Coming soon | Coming soon |
+| BOOTPLACE_Cityscapes | Multiple supervision | 523M | [Download](https://drive.google.com/file/d/1OeCourPQf1a6yM2BYNNuUKI3yvXRcD_N/view?usp=drive_link) |
 
 
 <!-- Usage -->
@@ -74,7 +73,7 @@ Here is an [example](test.py) of how to use the pretrained models for object pla
 ## 📚 Dataset
 <!-- We use the data from Cityscapes and [OPA](https://github.com/bcmi/Object-Placement-Assessment-Dataset-OPA). Note that we have provided instructions to prepare customized Cityscapes dataset for object composition in supplementary material. -->
 <!-- We provide **TRELLIS-500K**, a large-scale dataset containing 500K 3D assets curated from [Objaverse(XL)](https://objaverse.allenai.org/), [ABO](https://amazon-berkeley-objects.s3.amazonaws.com/index.html), [3D-FUTURE](https://tianchi.aliyun.com/specials/promotion/alibaba-3d-future), [HSSD](https://huggingface.co/datasets/hssd/hssd-models), and [Toys4k](https://github.com/rehg-lab/lowshot-shapebias/tree/main/toys4k), filtered based on aesthetic scores. Please refer to the [dataset README](DATASET.md) for more details. -->
-We provide a large-scale street-scene vehicle placement dataset curated from [Cityscapes](https://www.cityscapes-dataset.com/). 
+We provide a large-scale street-scene vehicle placement dataset [Download](https://drive.google.com/file/d/1wOzpMPy3Vy0tdBRD0xC1eW3SO2aVeCVX/view?usp=sharing) curated from [Cityscapes](https://www.cityscapes-dataset.com/). 
 The file structures are: 
 ├── train
     ├── backgrounds:
