@@ -166,11 +166,12 @@ This project is licensed under the terms of the MIT license.
 If you find this work helpful, please consider citing our paper:
 
 ```bibtex
-@article{zhou2025bootplace,
-    title   = {{BOOTPLACE}: Bootstrapped Object Placement with Detection Transformers},
-    author  = {Zhou, Hang and Zuo, Xinxin and Ma, Rui and Cheng, Li},
-    journal = {arXiv preprint arXiv:2503.21991}, 
-    year    = {2025}
+@inproceedings{zhou2025bootplace,
+  title={BOOTPLACE: Bootstrapped Object Placement with Detection Transformers},
+  author={Zhou, Hang and Zuo, Xinxin and Ma, Rui and Cheng, Li},
+  booktitle={Proceedings of the Computer Vision and Pattern Recognition Conference},
+  pages={19294--19303},
+  year={2025}
 }
 ```
 
