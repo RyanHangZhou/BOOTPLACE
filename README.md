@@ -18,6 +18,7 @@ PyTorch implementation for paper BOOTPLACE: Bootstrapped Object Placement with D
 
 **03/20/2025**
 - Release training code and pretrained models.
+
 **06/24/2025**
 - Release inference code and data.
 
